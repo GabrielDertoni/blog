@@ -53,42 +53,40 @@ $endfor$
             </nav>
         </header>
         <main class="width-content">
-            $for(include-before)$
+$for(include-before)$
             $include-before$
-            $endfor$
-            $if(title)$
+$endfor$
+$if(title)$
             <div id="title-block-header">
                 <h1 class="title">$title$</h1>
-                $if(subtitle)$
+$if(subtitle)$
                 <p class="subtitle">$subtitle$</p>
-                $endif$
+$endif$
                 <div class="authors">
                     <!-- Puts "Escrito por" when `lang-pt` is set and "Authored by" when `lang-en` is set -->
-                    <p><span class="text-underline">$if(lang-pt)$Escrito por$endif$$if(lang-en)$Authored by$endif$:</span>$for(author)$ $author$$sep$, $endfor$</p>
+                    <p><span class="text-underline">$if(lang-pt)$Escrito por$elseif(lang-en)$Authored by$endif$:</span>$for(author)$ $author$$sep$, $endfor$</p>
                 </div>
-                $if(date)$
+$if(date)$
                 <p class="date">$date$</p>
-                $endif$
+$endif$
             </div>
-            $endif$
+$endif$
             <ul class="keywords">
-                $for(keywords)$
-                <li>
-                    $keywords$
-                </li>
-                $endfor$
+$for(keywords)$
+                <li>$keywords$</li>
+$endfor$
             </ul>
-            $if(toc)$
-            <nav id="$idprefix$TOC">
+$if(toc)$
+            <nav id="TOC">
                 <!-- Puts "Conteúdo" when `lang-pt` is set and "Contents" when `lang-en` is set -->
-                <p class="list-title text-underline">$if(lang-pt)$Conteúdo$endif$$if(lang-en)$Contents$endif$:</p>
+                <p class="list-title text-underline">$if(lang-pt)$Conteúdo$elseif(lang-en)$Contents$endif$:</p>
                 $table-of-contents$
             </nav>
-            $endif$
+$endif$
             $body$
-            $for(include-after)$
+$for(include-after)$
             $include-after$
-            $endfor$
+$endfor$
         </main>
     </body>
 </html>
