@@ -75,7 +75,7 @@ $(PUBLIC_DIR)/index.html: $(CONTENT_DIR)/index.md $(STYLES) $(INDEX_TEMPLATE) | 
 
 ./:
 %/:
-	@printf "\t$(BGREEN)MKDIR$(RESET)\t$(patsubst %/, %, $@)\n"
+	@printf "\t$(BGREEN)MKDIR$(RESET)\t$(patsubst %/,%,$@)\n"
 	@mkdir -p $@
 
 clean:
