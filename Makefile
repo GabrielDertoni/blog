@@ -99,9 +99,16 @@ else
 fonts:
 endif
 
+# If `$(PANDOC)` is defined to be the command `pandoc`. Then we want to check if
+# it is available. However, if it is anything else (like a docker command), just
+# do nothing.
+
+ifeq ($(PANDOC),pandoc)
 pandoc:
 	@if ! command -v pandoc 2>&1 > /dev/null; then   \
 		echo "Couldn't find pandoc, installing now"; \
 		sudo apt install -y pandoc;                  \
 	fi
-
+else
+pandoc:
+endif
