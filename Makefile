@@ -8,6 +8,10 @@ FONTS_DIR      := fonts
 HL_STYLE       := $(STYLES_DIR)/gruvbox-dark.theme
 POST_TEMPLATE  := templates/post.html
 INDEX_TEMPLATE := templates/index.html
+
+# Font is a variable here but is not super easy to configure right now. You
+# would need to change `styles/fonts.css` and the other style sheets. Only fonts
+# available from 'Google Fonts' are supported for automatic download.
 FONT           := Fira Code
 
 ## Automatic variables ##
@@ -85,6 +89,8 @@ clean:
 cleanall: clean
 	@printf "\t$(BRED)RM$(RESET)\t$(FONTS_DIR)\n"
 	@rm -rf $(FONTS_DIR)
+
+# If the font directory is not present, try to download it from Google Fonts.
 
 ifeq ($(wildcard $(FONTS_DIR)/$(ESCAPE_FONT)/.),)
 fonts: $(FONTS_DIR)/$(ESCAPE_FONT) | $(FONTS_DIR)/
