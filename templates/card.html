@@ -1,0 +1,18 @@
+<li>
+    <!-- always use class "article-title", if `keywords` or `author` is set, add class "no-bottom-margin" -->
+    <h3 class="article-title$if(keywords)$ no-bottom-margin$elseif(author)$ no-bottom-margin$endif$">$title$</h3>
+$if(keywords)$
+    <div class="keywords">
+        <ul>
+$for(keywords)$
+            <li>#$keywords$</li>
+$endfor$
+        </ul>
+    </div>
+$endif$
+    <p class="author">$for(author)$$author$$sep$, $endfor$$if(date)$ @ $date$$endif$</p>
+$if(description)$
+    <p class="article-description">$description$</p>
+    <p><a href="$link$">Read -&gt;</a></p>
+$endif$
+</li>

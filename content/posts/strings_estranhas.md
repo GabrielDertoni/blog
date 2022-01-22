@@ -1,8 +1,13 @@
 ---
 title: Strings são estranhas
 author: Gabriel Dertoni
+date: May 26, 2021
 lang: pt-br
 lang-pt: true
+keywords:
+- C
+- string
+description: Como strings funcionam em C.
 ---
 
 ## Introdução

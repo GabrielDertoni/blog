@@ -4,10 +4,14 @@ PANDOC         := pandoc
 CONTENT_DIR    := content
 PUBLIC_DIR     := public
 STYLES_DIR     := styles
+TEMPLATE_DIR   := templates
 FONTS_DIR      := fonts
+BUILD_DIR      := build
 HL_STYLE       := $(STYLES_DIR)/gruvbox-dark.theme
-POST_TEMPLATE  := templates/post.html
-INDEX_TEMPLATE := templates/index.html
+POST_TEMPLATE  := $(TEMPLATE_DIR)/post.html
+INDEX_TEMPLATE := $(TEMPLATE_DIR)/index.html
+CARD_TEMPLATE  := $(TEMPLATE_DIR)/card.html
+AUX_TEMPLATE   := $(TEMPLATE_DIR)/header.html
 MARKDOWN       := markdown
 
 # Font is a variable here but is not super easy to configure right now. You
@@ -19,13 +23,15 @@ FONT           := Fira Code
 
 STYLES         := $(wildcard $(STYLES_DIR)/*.css)
 SOURCES        := $(shell find $(CONTENT_DIR) -name '*.md')
+POSTS          := $(wildcard $(CONTENT_DIR)/posts/*.md)
 # The $(__NOTHING) was not defined, so it will be empty. We use this trick to
 # write a literal space. Otherwise make would ignore the space.
-ESC_FONT    := $(subst $(__NOTHING) $(__NOTHING),_,$(strip $(FONT)))
+ESC_FONT       := $(subst $(__NOTHING) $(__NOTHING),_,$(strip $(FONT)))
 
 # HTML
-HTML_POSTS     := $(patsubst $(CONTENT_DIR)/posts/%.md, $(PUBLIC_DIR)/posts/%.html, $(SOURCES))
-HTML_PAGES     := $(patsubst $(CONTENT_DIR)/%.md, $(PUBLIC_DIR)/%.html, $(SOURCES))
+HTML_POSTS     := $(patsubst $(CONTENT_DIR)/%.md, $(PUBLIC_DIR)/%.html, $(POSTS))
+HTML_PAGES     := $(HTML_POSTS) $(PUBLIC_DIR)/index.html
+HTML_CARDS     := $(patsubst %.md,$(BUILD_DIR)/%-card.html,$(notdir $(POSTS)))
 
 ## Some utilities ##
 
@@ -52,7 +58,7 @@ serve: html
 	@printf "\t$(BYELLOW)SERVER$(RESET) http://localhost:8000\n"
 	@cd public && python3 -m http.server
 
-$(PUBLIC_DIR)/posts/%.html: $(CONTENT_DIR)/posts/%.md $(STYLES) $(POST_TEMPLATE) $(HL_STYLE) | $(PUBLIC_DIR)/posts/ pandoc fonts
+$(PUBLIC_DIR)/posts/%.html: $(CONTENT_DIR)/posts/%.md $(STYLES) $(POST_TEMPLATE) $(INDEX_AUX) $(HL_STYLE) | $(PUBLIC_DIR)/posts/ pandoc fonts
 	@printf "\t$(BBLUE)PANDOC$(RESET)\t$< -> $@\n"
 	@$(PANDOC)                            \
 		--from $(MARKDOWN)                \
@@ -67,16 +73,30 @@ $(PUBLIC_DIR)/posts/%.html: $(CONTENT_DIR)/posts/%.md $(STYLES) $(POST_TEMPLATE)
 		--output $@                       \
 		$<
 
-$(PUBLIC_DIR)/index.html: $(CONTENT_DIR)/index.md $(STYLES) $(INDEX_TEMPLATE) | $(PUBLIC_DIR)/ pandoc fonts
+$(PUBLIC_DIR)/index.html: $(CONTENT_DIR)/index.md $(STYLES) $(HTML_CARDS) $(INDEX_TEMPLATE) $(INDEX_AUX) | $(PUBLIC_DIR)/ pandoc fonts
+	@printf "\t$(BBLUE)PANDOC$(RESET)\t$@\n"
+	@$(PANDOC)                                                 \
+		--from $(MARKDOWN)                                     \
+		--to html                                              \
+		--self-contained                                       \
+		--eol lf                                               \
+		--wrap none                                            \
+		--template $(INDEX_TEMPLATE)                           \
+		$(patsubst %, --css="%", $(STYLES))                    \
+		$(patsubst %, --include-after-body="%", $(HTML_CARDS)) \
+		--output $@                                            \
+		$<
+
+$(BUILD_DIR)/%-card.html: $(CONTENT_DIR)/posts/%.md $(CARD_TEMPLATE) | build/
 	@printf "\t$(BBLUE)PANDOC$(RESET)\t$< -> $@\n"
-	@$(PANDOC)                            \
-		--from $(MARKDOWN)                \
-		--to html                         \
-		--self-contained                  \
-		--eol lf                          \
-		--template $(INDEX_TEMPLATE)      \
-		$(patsubst %, --css=%, $(STYLES)) \
-		--output $@                       \
+	@$(PANDOC)                          \
+		--from $(MARKDOWN)              \
+		--to html                       \
+		--eol lf                        \
+		--wrap none                     \
+		--template $(CARD_TEMPLATE)     \
+		--variable="link:posts/$*.html" \
+		--output $@                     \
 		$<
 
 ./:
@@ -87,6 +107,8 @@ $(PUBLIC_DIR)/index.html: $(CONTENT_DIR)/index.md $(STYLES) $(INDEX_TEMPLATE) | 
 clean:
 	@printf "\t$(BRED)RM$(RESET)\t$(PUBLIC_DIR)\n"
 	@rm -rf $(PUBLIC_DIR)
+	@printf "\t$(BRED)RM$(RESET)\t$(BUILD_DIR)\n"
+	@rm -rf $(BUILD_DIR)
 
 cleanall: clean
 	@printf "\t$(BRED)RM$(RESET)\t$(FONTS_DIR)\n"

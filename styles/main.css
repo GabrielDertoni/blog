@@ -43,6 +43,11 @@
     --inline-code-bg-color: var(--bg1);
     --code-bg-color: var(--bg1);
     --content-width: 800px;
+    --keywords-color: var(--fg4);
+
+    --article-list-bg-color: var(--bg1);
+    --article-list-fg-color: var(--light-aqua);
+    --author-color: var(--dark-aqua);
 }
 
 body {
@@ -78,6 +83,10 @@ a:hover {
 
 h1 {
     color: var(--title-color);
+}
+
+h1.title {
+    margin-bottom: .3em;
 }
 
 h1::after {
@@ -123,6 +132,14 @@ p {
     text-decoration: underline;
 }
 
+.text-ligatures {
+    font-variant-ligatures: normal;
+}
+
+.text-hide {
+    display: none;
+}
+
 .list-title {
     margin-bottom: 0;
 }
@@ -133,6 +150,10 @@ p {
 
 .width-content {
     width: var(--content-width);
+}
+
+.no-bottom-margin {
+    margin-bottom: 0;
 }
 
 #top-bar {
@@ -171,14 +192,51 @@ p {
     color: var(--nav-bar-link-hover-color);
 }
 
-ul.keywords {
+.keywords > ul {
+    margin-top: 0;
     display: flex;
     flex-flow: row nowrap;
-    gap: 2em;
+    gap: 1em;
+    padding: 0;
+    color: var(--keywords-color);
 }
 
-ul.keywords li {
+.keywords > ul > li {
     list-style: none;
+}
+
+.article-list > ul {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 1em;
+    padding: 0;
+}
+
+.article-list > ul > li {
+    padding: 0 1em;
+    background-color: var(--article-list-bg-color);
+    list-style: none;
+}
+
+.article-list > ul > li a {
+    font-variant-ligatures: normal;
+    color: var(--article-list-fg-color);
+}
+
+.article-title {
+    color: var(--title-color);
+}
+
+.article-title::after {
+    content: '';
+    display: block;
+    width: 100%;
+    border-bottom: solid 3px;
+}
+
+.author {
+    color: var(--author-color);
+    margin-top: .3em;
 }
 
 @media screen and (max-width: 1000px) {

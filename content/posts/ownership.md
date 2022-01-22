@@ -3,6 +3,7 @@ title: Como nunca sofrer de segfault e double free
 author: Gabriel Dertoni
 lang: pt-br
 lang-pt: true
+description: Uma técnica para evitar problemas com memória inspirado por Rust.
 ---
 
 ## Introdução
