@@ -178,7 +178,7 @@ void main() {
     // a memória na heap pela convenção.
     vec_push(&inteiros, 80);
     vec_push(&inteiros, 42);
-    
+
     vec_free(inteiros);
     // Não podemos mais usar a variável `inteiros`.
 }
