@@ -3,11 +3,14 @@
 PANDOC         := pandoc
 CONTENT_DIR    := content
 PUBLIC_DIR     := public
+PDF_DIR        := pdf
 STYLES_DIR     := styles
 TEMPLATE_DIR   := templates
 FONTS_DIR      := fonts
 BUILD_DIR      := build
-HL_STYLE       := $(STYLES_DIR)/gruvbox-dark.theme
+HTML_HL_STYLE  := $(STYLES_DIR)/gruvbox-dark.theme
+PDF_HL_STYLE   := $(STYLES_DIR)/gruvbox-light.theme
+PDF_TEMPLATE   := $(TEMPLATE_DIR)/pdf.latex
 POST_TEMPLATE  := $(TEMPLATE_DIR)/post.html
 INDEX_TEMPLATE := $(TEMPLATE_DIR)/index.html
 CARD_TEMPLATE  := $(TEMPLATE_DIR)/card.html
@@ -33,6 +36,9 @@ HTML_POSTS     := $(patsubst $(CONTENT_DIR)/%.md, $(PUBLIC_DIR)/%.html, $(POSTS)
 HTML_PAGES     := $(HTML_POSTS) $(PUBLIC_DIR)/index.html
 HTML_CARDS     := $(patsubst %.md,$(BUILD_DIR)/%-card.html,$(notdir $(POSTS)))
 
+# PDF
+PDF_POSTS     := $(patsubst $(CONTENT_DIR)/posts/%.md, $(PDF_DIR)/%.pdf, $(POSTS))
+
 ## Some utilities ##
 
 # Colors
@@ -46,31 +52,70 @@ fname = $(basename $(notdir $(1)))
 
 ## Rules ##
 
-.PHONY: all clean cleanall pandoc html serve fonts
+.PHONY: all clean cleanall pandoc html serve fonts copy_styles pdf
 .PRECIOUS: ./ %/
 
-all: $(HTML_PAGES)
+all: $(HTML_PAGES) | copy_styles
 html: $(HTML_PAGES)
-echo_srcs:
-	@echo $(SOURCES)
+pdf: $(PDF_POSTS)
+
+copy_styles: $(patsubst $(STYLES_DIR)/%.css,$(PUBLIC_DIR)/styles/%.css,$(STYLES))
+
+$(PUBLIC_DIR)/styles/%.css: $(STYLES_DIR)/%.css | $(PUBLIC_DIR)/styles/
+	@printf "\t$(BGREEN)CP$(RESET)\t$^ -> public/styles\n"
+	@cp $^ $(PUBLIC_DIR)/styles
 
 serve: html
 	@printf "\t$(BYELLOW)SERVER$(RESET) http://localhost:8000\n"
 	@cd public && python3 -m http.server
 
-$(PUBLIC_DIR)/posts/%.html: $(CONTENT_DIR)/posts/%.md $(STYLES) $(POST_TEMPLATE) $(INDEX_AUX) $(HL_STYLE) | $(PUBLIC_DIR)/posts/ pandoc fonts
+$(PDF_DIR)/%.pdf: $(CONTENT_DIR)/posts/%.md $(PDF_HL_STYLE) | $(PDF_DIR)/ pandoc
 	@printf "\t$(BBLUE)PANDOC$(RESET)\t$< -> $@\n"
 	@$(PANDOC)                            \
 		--from $(MARKDOWN)                \
-		--to html                         \
-		--self-contained                  \
+		--to pdf                          \
+		--standalone                      \
 		--toc                             \
 		--eol lf                          \
+		--pdf-engine=xelatex              \
 		--wrap none                       \
-		--template $(POST_TEMPLATE)       \
-		$(patsubst %, --css=%, $(STYLES)) \
-		--highlight-style $(HL_STYLE)     \
+		--highlight-style $(PDF_HL_STYLE) \
+		 -V geometry:margin=1in           \
 		--output $@                       \
+		$<
+
+# Prettier, but --embed-resources is broken
+# $(PUBLIC_DIR)/posts/%.html: $(CONTENT_DIR)/posts/%.md $(STYLES) $(POST_TEMPLATE) $(INDEX_AUX) $(HTML_HL_STYLE) | $(PUBLIC_DIR)/posts/ pandoc fonts
+# 	@printf "\t$(BBLUE)PANDOC$(RESET)\t$< -> $@\n"
+# 	@$(PANDOC)                            \
+# 		--from $(MARKDOWN)                \
+# 		--to html                         \
+# 		--standalone                      \
+# 		--toc                             \
+# 		--eol lf                          \
+# 		--katex=https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/                           \
+# 		--wrap none                       \
+# 		--template $(POST_TEMPLATE)       \
+# 		$(patsubst %, --css=/%, $(STYLES)) \
+# 		--highlight-style $(HTML_HL_STYLE)     \
+# 		--output $@                       \
+# 		$<
+
+$(PUBLIC_DIR)/posts/%.html: $(CONTENT_DIR)/posts/%.md $(STYLES) $(POST_TEMPLATE) $(INDEX_AUX) $(HTML_HL_STYLE) | $(PUBLIC_DIR)/posts/ pandoc fonts
+	@printf "\t$(BBLUE)PANDOC$(RESET)\t$< -> $@\n"
+	@$(PANDOC)                                        \
+		--from $(MARKDOWN)                            \
+		--to html                                     \
+		--standalone                                  \
+		--embed-resources                             \
+		--toc                                         \
+		--eol lf                                      \
+		--mathjax                                     \
+		--wrap none                                   \
+		--template $(POST_TEMPLATE)                   \
+		$(patsubst %, --css=%, $(STYLES))             \
+		--highlight-style $(HTML_HL_STYLE)            \
+		--output $@                                   \
 		$<
 
 $(PUBLIC_DIR)/index.html: $(CONTENT_DIR)/index.md $(STYLES) $(HTML_CARDS) $(INDEX_TEMPLATE) $(INDEX_AUX) | $(PUBLIC_DIR)/ pandoc fonts
@@ -78,8 +123,9 @@ $(PUBLIC_DIR)/index.html: $(CONTENT_DIR)/index.md $(STYLES) $(HTML_CARDS) $(INDE
 	@$(PANDOC)                                                 \
 		--from $(MARKDOWN)                                     \
 		--to html                                              \
-		--self-contained                                       \
+		--standalone                                           \
 		--eol lf                                               \
+		--katex=https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/                           \
 		--wrap none                                            \
 		--template $(INDEX_TEMPLATE)                           \
 		$(patsubst %, --css="%", $(STYLES))                    \

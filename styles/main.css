@@ -50,6 +50,24 @@
     --author-color: var(--dark-aqua);
 }
 
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    /* -webkit-box-shadow: inset 0 0 6px rgb(0 0 0 / 30%); */
+    background-color: #0f0f0f;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+    background-color: #282828;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 10px;
+    background-color: #282828;
+}
+
 body {
     padding: 2em;
     font-size: 1rem;
@@ -57,7 +75,7 @@ body {
     background-color: #282828;
     color: var(--main-text-color);
     font-family: 'Fira Code', monospace;
-    font-variant-ligatures: no-contextual;
+    font-variant-ligatures: normal;
 
     display: flex;
     flex-flow: column nowrap;
@@ -105,6 +123,12 @@ code {
     border-radius: 3px;
     color: var(--inline-code-color);
     background-color: var(--inline-code-bg-color);
+    font-family: 'Fira Code';
+    font-variant-ligatures: normal;
+}
+
+code:not(.sourceCode) {
+    font-size: .8em;
 }
 
 pre code {
